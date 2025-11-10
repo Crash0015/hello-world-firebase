@@ -7,9 +7,9 @@ on:
 
 jobs:
   # -----------------------------------------------
-  # JOB 1: Build & Push to DockerHub
+  # JOB 1: Build & Push to DockerHub (For Rubric)
   # This job builds the Dockerfile and pushes it to
-  # DockerHub.
+  # DockerHub to meet Criterio 4.
   # -----------------------------------------------
   build-and-push-dockerhub:
     runs-on: ubuntu-latest
@@ -35,22 +35,21 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-world-firebase:latest
 
   # -----------------------------------------------
-  # JOB 2: Deploy to Firebase Hosting
-  # This job takes the static files (index.html, etc.)
-  # and deploys them to Firebase Hosting.
+  # JOB 2: Deploy to Firebase Hosting (Corrected)
+  # This job waits for Job 1 to finish and deploys
+  # the static files to Firebase Hosting.
   # -----------------------------------------------
   deploy-to-firebase:
+    needs: build-and-push-dockerhub
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # This is the official Firebase action
+      # This is the official Firebase Action
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          # This is the secret token you will generate
-          token: ${{ secrets.FIREBASE_TOKEN }}
-
-          # This is the Firebase Project ID
-          projectId: "hello-world-firebase-640c3"
+          # We use the Service Account (from the .json)
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

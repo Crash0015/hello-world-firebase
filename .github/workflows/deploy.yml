@@ -8,8 +8,6 @@ on:
 jobs:
   # -----------------------------------------------
   # JOB 1: Build & Push to DockerHub (For Rubric)
-  # This job builds the Dockerfile and pushes it to
-  # DockerHub to meet Criterio 4.
   # -----------------------------------------------
   build-and-push-dockerhub:
     runs-on: ubuntu-latest
@@ -35,11 +33,10 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hello-world-firebase:latest
 
   # -----------------------------------------------
-  # JOB 2: Deploy to Firebase Hosting (Corrected)
-  # This job waits for Job 1 to finish and deploys
-  # the static files to Firebase Hosting.
+  # JOB 2: Deploy to Firebase Hosting (FINAL FIX)
   # -----------------------------------------------
   deploy-to-firebase:
+    # This job 'needs' (waits for) Job 1 to finish
     needs: build-and-push-dockerhub
     runs-on: ubuntu-latest
 
@@ -51,5 +48,8 @@ jobs:
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          # We use the Service Account (from the .json)
+          # This uses the .json key you added as a secret
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+          # This line fixes the error by deploying to the "live" production channel
+          channelId: live
